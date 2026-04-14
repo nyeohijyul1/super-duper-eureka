@@ -18,38 +18,21 @@
           여기에 강조된 문구가 표시됩니다. 클릭하면 세부 내용으로 이동합니다.
         </li>
       </ul>
+      <section>
+        <h3>제목</h3>
+        <pre>
+          여기에 코드가 표시됩니다. 클릭하면 복사됩니다.
+        </pre>
+        <p>
+          여기에 설명이 표시됩니다.
+        </p>
+      </section>
       <div id="popupcontainer" class="none"></div>
     </div>
-    <div id="alert">로그인하고오쇼</div>
-    <script>
-      MathJax = {
-        tex: {
-          inlineMath: [
-            ["$", "$"],
-            ["\\(", "\\)"],
-          ],
-        },
-        svg: {
-          fontCache: "global",
-        },
-      };
-    </script>
-    <script
-      type="text/javascript"
-      id="MathJax-script"
-      async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
-    ></script>
+    <div id="alert">로그인되지않음</div>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-
-      import {
-        getDatabase,
-        ref,
-        set,
-        get,
-      } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
-
+      import { getDatabase, ref, set, get, } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
       const firebaseConfig = {
         apiKey: "AIzaSyAUkJIqmar5DIhIezrx0tD3v27oXcEp-Ho",
         authDomain: "read-75b26.firebaseapp.com",
@@ -63,39 +46,30 @@
       };
       const app = initializeApp(firebaseConfig);
       const db = getDatabase(app);
-      import {
-        getAuth,
-        onAuthStateChanged,
-      } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-
+      import { getAuth, onAuthStateChanged, } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
       const auth = getAuth(app);
+      
       let currentUser = null;
 
       onAuthStateChanged(auth, (user) => {
         if (user) {
           document.querySelector("#alert").classList.add("none");
           document.querySelector("#content").classList.remove("none");
-
           currentUser = user;
-
           loadData();
         }
       });
 
-      let topic = "em";
+      // let topic = "em";
 
       async function loadData() {
         let uid = currentUser.uid;
 
-        const dataset = await get(ref(db, `${uid}/code/python/${topic}`));
+        const dataset = await get(ref(db, `${uid}/code/python`));
         if (dataset.val()) {
           document.querySelector("#testli").classList.add("none");
-          if (list.children) {
-            [...list.children].forEach((li) => {
-              li.remove();
-            });
-          }
-          switch (topic) {
+          if (list.children) { [...list.children].forEach((li) => { li.remove(); }); }
+          /* switch (topic) {
             case "list":
               for (const key in dataset.val()) {
                 const newLI = document.createElement("li");
@@ -119,24 +93,19 @@
               }
             default:
               break;
-          }
+          } */
         } else {
           document.querySelector("#testli").classList.remove("none");
         }
-        MathJax.typeset();
       }
 
       async function saveItem() {
         let uid = currentUser.uid;
 
-        const editDataRef =
-          document.querySelector("#popupcontainer").firstChild;
+        const editDataRef = document.querySelector("#popupcontainer").firstChild;
 
         let title = editDataRef.firstChild.value;
-        if (!title) {
-          alert("제목을 입력해 주세요.");
-          return;
-        }
+        if (!title) { alert("제목을 입력해 주세요."); return; }
 
         let tableInputTRset = editDataRef.lastChild.children[1].children;
         let i = 0;
@@ -145,32 +114,23 @@
         for (const tr of tableInputTRset) {
           let arr = new Array(4);
           arr[0] = tr.children[0].querySelector("input").value;
-          if (!arr[0]) {
-            break;
-          }
+          if (!arr[0]) { break; }
           let j = 1;
           for (const td of [...tr.children].slice(1, 4)) {
             arr[j] = td.querySelector("input").checked;
             j++;
           }
 
-          if (arr[1] == true) {
-            arr[0] = "$$" + arr[0] + "$$";
-          }
+          if (arr[1] == true) { arr[0] = "$$" + arr[0] + "$$"; }
           let tmp = { text: arr[0], em: arr[2], br: arr[3] };
-          if (arr[2] == true) {
-            emobj[i] = tmp;
-          }
+          if (arr[2] == true) { emobj[i] = tmp; }
+          
           listobj[i] = tmp;
           i++;
         }
-        if (await get(ref(db, `${uid}/code/python/em/${title}`))) {
-          await set(ref(db, `${uid}/code/python/em/${title}`), null);
-        }
+        if (await get(ref(db, `${uid}/code/python/em/${title}`))) { await set(ref(db, `${uid}/code/python/em/${title}`), null); }
         await set(ref(db, `${uid}/code/python/em/${title}`), emobj);
-        if (await get(ref(db, `${uid}/code/python/list/${title}`))) {
-          await set(ref(db, `${uid}/code/python/list/${title}`), null);
-        }
+        if (await get(ref(db, `${uid}/code/python/list/${title}`))) { await set(ref(db, `${uid}/code/python/list/${title}`), null); }
         await set(ref(db, `${uid}/code/python/list/${title}`), listobj);
         alert("저장 성공");
         closepopup();
@@ -180,9 +140,7 @@
       async function viewItem(title) {
         let uid = currentUser.uid;
 
-        const dataset = await get(
-          ref(db, `${uid}/code/python/list/${title}`),
-        );
+        const dataset = await get(ref(db, `${uid}/code/python/list/${title}`));
         openpopup();
 
         const div = document.createElement("div");
@@ -212,9 +170,7 @@
           const content = dataset.val()[contentTitle];
           const newspan = document.createElement("span");
           newspan.textContent = content.text + " ";
-          if (content.em == true) {
-            newspan.classList.add("emphasize");
-          }
+          if (content.em == true) { newspan.classList.add("emphasize"); }
           contentdiv.appendChild(newspan);
           if (content.br == true) {
             const br = document.createElement("br");
@@ -224,14 +180,11 @@
         div.appendChild(contentdiv);
         div.classList.add("margin20");
         popup.appendChild(div);
-        MathJax.typeset();
       }
 
       async function editItem(title) {
         let uid = currentUser.uid;
-        const dataset = await get(
-          ref(db, `${uid}/code/python/list/${title}`),
-        );
+        const dataset = await get(ref(db, `${uid}/code/python/list/${title}`));
 
         const div = document.createElement("div");
 
@@ -281,9 +234,7 @@
           });
           const delbtn = document.createElement("button");
           delbtn.textContent = "행 삭제";
-          delbtn.addEventListener("click", (event) => {
-            event.target.parentNode.parentNode.remove();
-          });
+          delbtn.addEventListener("click", (event) => { event.target.parentNode.parentNode.remove(); });
           td.appendChild(newbtn);
           td.appendChild(input);
           td.appendChild(swapbtn);
