@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../style.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="content" class="none">
+      <ul id="anchorlist"></ul>
+      <button id="addbtn">새 항목 추가</button>
+      <div id="sectiondiv"></div>
+      <fieldset id="testsection">
+        <legend>제목</legend>
+        <pre>여기에 코드가 표시됩니다. 클릭하면 복사됩니다.</pre>
+        <p>여기에 설명이 표시됩니다.</p>
+      </fieldset>
+      <div id="popupcontainer" class="none"></div>
+    </div>
+    <div id="alert">로그인되지않음</div>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+      import { getDatabase, ref, set, get, } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+      const firebaseConfig = {
+        apiKey: "AIzaSyAUkJIqmar5DIhIezrx0tD3v27oXcEp-Ho",
+        authDomain: "read-75b26.firebaseapp.com",
+        databaseURL:
+          "https://read-75b26-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "read-75b26",
+        storageBucket: "read-75b26.firebasestorage.app",
+        messagingSenderId: "441487145421",
+        appId: "1:441487145421:web:cb06f12157b94db9ff2c84",
+        measurementId: "G-QH5YZEE8F8",
+      };
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+      import { getAuth, onAuthStateChanged, } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+      const auth = getAuth(app);
+      
+      let currentUser = null;
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          document.querySelector("#alert").classList.add("none");
+          document.querySelector("#content").classList.remove("none");
+          currentUser = user;
+          loadData();
+        }
+      });
+
+      async function loadData() {
+        let uid = currentUser.uid;
+
+        const dataset = await get(ref(db, `${uid}/code/css`));
+        if (dataset.val()) {
+          document.querySelector("#testsection").classList.add("none");
+          const anchorlist = document.querySelector("#anchorlist");
+          if (section.children) { [...section.children].forEach((li) => { li.remove(); }); }
+          if (anchorlist.children) { [...anchorlist.children].forEach((li) => { li.remove(); }); }
+          for (const key in dataset.val()) {
+            const newSection = document.createElement("fieldset");
+            const newlegend = document.createElement("legend");newlegend.textContent = key;newlegend.addEventListener("click", () => { openpopup(); editItem(key); });newlegend.setAttribute("id", key);
+            const newcode = document.createElement("pre");newcode.textContent = dataset.val()[key].code;
+            const newdescription = document.createElement("p");newdescription.textContent = dataset.val()[key].description;
+            
+            newSection.appendChild(newlegend);newSection.appendChild(newcode);newSection.appendChild(newdescription);
+            section.appendChild(newSection);
+
+            const newli = document.createElement("li");
+            const newanchor = document.createElement("a");newanchor.textContent = key;newanchor.setAttribute("href", `#${key}`);
+            newli.appendChild(newanchor);anchorlist.appendChild(newli);
+          }
+        } else { document.querySelector("#testsection").classList.remove("none"); }
+      }
+
+      async function saveItem() {
+        let uid = currentUser.uid;
+
+        const title = document.querySelector("input").value;
+        if (!title) { alert("제목을 입력해 주세요."); return; }
+
+        const inputdata = document.querySelectorAll("textarea");
+        let obj = {};
+        obj.code = inputdata[0].value;
+        obj.description = inputdata[1].value;
+        
+        if (await get(ref(db, `${uid}/code/css/${title}`))) { await set(ref(db, `${uid}/code/css/${title}`), null); }
+        await set(ref(db, `${uid}/code/css/${title}`), obj);
+        alert("저장 성공");
+        closepopup();
+        loadData();
+      }
+
+      async function editItem(title) {
+        let uid = currentUser.uid;
+        const dataset = await get(ref(db, `${uid}/code/css/${title}`));
+
+        const div = document.createElement("div");
+        const br = document.createElement("br");
+
+        const titleData = document.createElement("input");titleData.setAttribute("type", "hidden");titleData.classList.add("none");titleData.value = title;
+        const itemTitle = document.createElement("h1");itemTitle.textContent = title;
+        const cancelbtn = document.createElement("button");cancelbtn.textContent = "작성 취소";cancelbtn.addEventListener("click", closepopup);
+        const savebtn = document.createElement("button");savebtn.textContent = "저장";savebtn.addEventListener("click", saveItem);
+
+        const codearea = document.createElement("textarea");codearea.value = dataset.val().code;codearea.setAttribute("id", "codeinput");
+        const descriptions = document.createElement("textarea");descriptions.value = dataset.val().description;descriptions.setAttribute("id", "descriptioninput");
+
+        div.appendChild(titleData);
+        div.appendChild(itemTitle);
+        div.appendChild(cancelbtn);
+        div.appendChild(savebtn);
+        div.appendChild(codearea);
+        div.appendChild(descriptions);
+        div.classList.add("margin20");
+        popup.appendChild(div);
+      }
+
+      function openpopup() { closepopup(); popup.classList.remove("none"); }
+      function closepopup() {
+        popup.classList.add("none");
+        popup.children[0]?.remove();
+        addbtn.textContent = "새 항목 추가";
+        addbtn.removeAttribute("disabled");
+      }
+
+      function editNewItem() {
+        const div = document.createElement("div");
+
+        const itemTitle = document.createElement("input");itemTitle.setAttribute("id", "title");itemTitle.setAttribute("type", "text");itemTitle.setAttribute("placeholder", "제목 입력");
+        const cancelbtn = document.createElement("button");cancelbtn.textContent = "작성 취소";cancelbtn.addEventListener("click", closepopup);
+        const savebtn = document.createElement("button");savebtn.textContent = "저장";savebtn.addEventListener("click", saveItem);
+
+        const codearea = document.createElement("textarea");codearea.setAttribute("placeholder", "여기에 코드입력");codearea.setAttribute("id", "codeinput");
+        const descriptions = document.createElement("textarea");descriptions.setAttribute("placeholder", "여기에 설명입력");descriptions.setAttribute("id", "descriptioninput");
+
+        div.appendChild(itemTitle);
+        div.appendChild(cancelbtn);
+        div.appendChild(savebtn);
+        div.appendChild(codearea);
+        div.appendChild(descriptions);
+        div.classList.add("margin20");
+        popup.appendChild(div);
+      }
+
+      const section = document.querySelector("#sectiondiv");
+      section.addEventListener("click", (event) => {
+        if (event.target.tagName == "PRE") { window.navigator.clipboard.writeText(event.target.textContent); }
+      });
+
+      const addbtn = document.querySelector("#addbtn");
+      const popup = document.querySelector("#popupcontainer");
+      addbtn.addEventListener("click", () => {
+        addbtn.textContent = "새 항목 추가중...";
+        addbtn.setAttribute("disabled", true);
+        openpopup();
+        editNewItem();
+      });
+    </script>
+  </body>
+</html>
