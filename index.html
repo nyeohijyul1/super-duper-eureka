@@ -3,31 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
     <title>Document</title>
   </head>
   <body>
     <div id="container">
       <div id="logindiv">
-        이메일
-        <input type="email" id="email" />
-        비밀번호
-        <input type="password" id="password" />
+        이메일<input type="email" id="email" />
+        비밀번호<input type="password" id="password" />
         <button id="loginbtn">login</button>
       </div>
       <div id="contentdiv" class="none">
         <a href="./p">python</a>
+        <a href="./js">javascript</a>
         <button id="logoutbtn">logout</button>
       </div>
     </div>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-      import {
-        getAuth,
-        signInWithEmailAndPassword,
-        signOut,
-        onAuthStateChanged,
-      } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+      import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyAUkJIqmar5DIhIezrx0tD3v27oXcEp-Ho",
@@ -55,9 +50,7 @@
           document.querySelector("#contentdiv").classList.remove("none");
           document.querySelector("#email").value = "";
           document.querySelector("#password").value = "";
-        } catch (e) {
-          alert("로그인 실패");
-        }
+        } catch (e) { alert("로그인 실패"); }
       }
 
       async function logout() {
@@ -65,17 +58,12 @@
           await signOut(auth);
           document.querySelector("#contentdiv").classList.add("none");
           document.querySelector("#logindiv").classList.remove("none");
-          //   sessionStorage.setItem("uid", "");
-        } catch (e) {
-          alert("오류: 잠시 뒤 다시 시도해주세요.");
-        }
+        } catch (e) { alert("로그아웃 실패"); }
       }
 
       document.querySelector("#loginbtn").addEventListener("click", login);
       document.querySelector("#password").addEventListener("keydown", (e) => {
-        if (e.key == "Enter") {
-          login();
-        }
+        if (e.key == "Enter") { login(); }
       });
       document.querySelector("#logoutbtn").addEventListener("click", logout);
       onAuthStateChanged(auth, (user) => {
