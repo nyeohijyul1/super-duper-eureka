@@ -15,8 +15,7 @@
         <button id="loginbtn">login</button>
       </div>
       <div id="contentdiv" class="none">
-        <a href="./m">math</a>
-        <a href="./p">physics</a>
+        <a href="./p">python</a>
         <button id="logoutbtn">logout</button>
       </div>
     </div>
@@ -83,10 +82,6 @@
         if (user) {
           document.querySelector("#logindiv").classList.add("none");
           document.querySelector("#contentdiv").classList.remove("none");
-          const uid = user.uid;
-          console.log("현재 로그인한 사용자 UID:", uid);
-        } else {
-          console.log("로그인된 사용자가 없습니다.");
         }
       });
     </script>
