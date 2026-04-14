@@ -22,6 +22,7 @@ a {
   padding: 5px;
   margin: 5px;
 }
+a:hover { color: #fff; background-color: #000; }
 fieldset { margin-bottom: 10px; padding-top: 0; padding-bottom: 0; border-color: #000; height: fit-content; }
 legend { font-size: 30px; }
 pre { background-color: #e0e0e0; padding: 10px; }
